@@ -1,0 +1,123 @@
+\documentclass[a4paper,12pt,titlepage,draft]{article}
+% при подготовке финальной версии отчёта смените опцию draft на final
+
+\usepackage[T1,T2A]{fontenc}     % форматы шрифтов
+\usepackage[utf8x]{inputenc}     % кодировка символов, используемая в данном файле
+\usepackage[russian]{babel}      % пакет русификации
+\usepackage{tikz}                % для создания иллюстраций
+\usepackage{pgfplots}            % для вывода графиков функций
+\usepackage{geometry}		     % для настройки размера полей
+\usepackage{indentfirst}         % для отступа в первом абзаце секции
+
+% выбираем размер листа А4, все поля ставим по 3см
+\geometry{a4paper,left=30mm,top=30mm,bottom=30mm,right=30mm}
+
+\begin{document}
+
+\begin{titlepage}
+    \begin{center}
+	{\Large \sc Отчет по заданию}\\
+	~\\
+	{\large \bf <<Реализация алгоритма 3D Якоби с использованием графических процессоров>>}\\ 
+    \end{center}
+    \begin{flushright}
+	\vfill {Выполнил:\\
+	студент 201 группы\\
+	Лыфенко~А.~И.\\.}
+    \end{flushright}
+    \begin{center}
+	\vfill
+	{\small Москва\\ \the\year{}}
+    \end{center}
+\end{titlepage}
+
+\section{Постановка задачи}
+1. Реализовать параллельный алгоритм 3-х мерного Якоби по данному последовательному алгоритму.\\
+
+2. Оценить ускорение программы по отношению к последовательной версии.\\
+\newpage
+
+\section{Результаты работы программы}
+\begin{minipage}{.5\textwidth}
+\textbf{Последовательное выполнение:}\\
+
+ Jacobi3D Benchmark Completed.\\
+ Size            =  100 x  100 x  100\\
+ Iterations      =                100\\
+ Time in seconds =               4.80\\
+ Operation type  =     floating point\\
+ Verification    =         SUCCESSFUL\\
+ END OF Jacobi3D Benchmark\\
+ 
+Jacobi3D Benchmark Completed.\\
+Size            =  384 x  384 x  384\\
+Iterations      =                100\\
+Time in seconds =             283.73\\
+Operation type  =     floating point\\
+Verification    =       UNSUCCESSFUL\\
+END OF Jacobi3D Benchmark\\
+
+Jacobi3D Benchmark Completed.\\
+ Size            =  500 x  500 x  500\\
+ Iterations      =                100\\
+ Time in seconds =             630.34\\
+ Operation type  =     floating point\\
+ Verification    =       UNSUCCESSFUL\\
+ END OF Jacobi3D Benchmark\\
+
+Jacobi3D Benchmark Completed.\\
+ Size            =  500 x  500 x  500\\
+ Iterations      =                200\\
+ Time in seconds =            1268.34\\
+ Operation type  =     floating point\\
+ Verification    =         SUCCESSFUL\\
+ END OF Jacobi3D Benchmark\\
+ 
+\end{minipage}
+\begin{minipage}{.45\textwidth}
+\textbf{Параллельное выполнение:}\\
+
+ Jacobi3D Benchmark Completed.\\
+ Size            =  100 x  100 x  100\\
+ Iterations      =                100\\
+ Time in seconds =               0.19\\
+ Operation type  =     floating point\\
+ Verification    =         SUCCESSFUL\\
+ END OF Jacobi3D Benchmark\\
+
+Jacobi3D Benchmark Completed.\\
+ Size            =  384 x  384 x  384\\
+ Iterations      =                100\\
+ Time in seconds =               1.07\\
+ Operation type  =     floating point\\
+ Verification    =       UNSUCCESSFUL\\
+ END OF Jacobi3D Benchmark\\
+
+ Jacobi3D Benchmark Completed.\\
+ Size            =  500 x  500 x  500\\
+ Iterations      =                100\\
+ Time in seconds =               2.21\\
+ Operation type  =     floating point\\
+ Verification    =       UNSUCCESSFUL\\
+ END OF Jacobi3D Benchmark\\
+
+ Jacobi3D Benchmark Completed.\\
+ Size            =  500 x  500 x  500\\
+ Iterations      =                200\\
+ Time in seconds =               4.41\\
+ Operation type  =     floating point\\
+ Verification    =         SUCCESSFUL\\
+ END OF Jacobi3D Benchmark\\
+
+\end{minipage}
+
+\newpage
+\section{Сравнение скорости работы алгоритмов}
+\textbf{Последовательный алгоритм:}\\
+
+Теоритическая оценка: $O(L^3 * I)$\\
+
+\textbf{Параллельный алгоритм:}\\
+
+Теоритическая оценка: $O(I * ???)$
+\end{document}
