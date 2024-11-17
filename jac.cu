@@ -9,19 +9,12 @@
 
 #define Max(a, b) ((a) > (b) ? (a) : (b))
 
-#define L 384
-#define ITMAX 100
+#define L 500
+#define ITMAX 200
 
 dim3 block = dim3(64, 64, 64);
 dim3 thread = dim3(8, 8, 8);
 
-struct maximun
-{
-    double __device__ __host__ operator ()( const double& x, const double& y ) const
-    {
-        return x > y ? x : y;
-    }
-};
 
 int i, j, k, it;
 double eps;
@@ -64,7 +57,6 @@ __global__ void ab(int mm, int nn, int kk, double* a, double* b)
 double jac(double* a, int mm, int nn, int kk, int itmax, double maxeps)
 {
 	double* b;
-	double eps;
 
 	cudaMalloc((void**)&b, mm * nn * kk * sizeof(double));
 	
