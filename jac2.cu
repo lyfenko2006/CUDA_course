@@ -11,8 +11,8 @@
 
 #define Max(a, b) ((a) > (b) ? (a) : (b))
 
-#define L 500
-#define ITMAX 200
+#define L 100
+#define ITMAX 100
 
 dim3 block = dim3(64, 64, 64);
 dim3 thread = dim3(8, 8, 8);
@@ -64,15 +64,18 @@ double jac_parallel(double* a, int mm, int nn, int kk, int itmax, double maxeps)
 	for (it = 1; it <= itmax - 1; it++)
 	{
 		function << <block, thread >> > (mm, nn, kk, a, b);	
-	
+	    cudaDeviceSynchronize();
+
 		eps = 0.;
 
 		thrust::device_vector<double> diff(mm * nn * kk);
 		double* ptrdiff = thrust::raw_pointer_cast(&diff[0]);
 		difference << <block, thread >> > (mm, nn, kk, a, b, ptrdiff);
+        cudaDeviceSynchronize();
 
 		eps = thrust::reduce(diff.begin(), diff.end(), 0.0, thrust::maximum<double>());
 		ab << <block, thread >> > (mm, nn, kk, a, b);
+        cudaDeviceSynchronize();
 
 		//if (TRACE && it % TRACE == 0)
 			printf(" IT = %4i   EPS = %14.7E\n", it, eps);
@@ -145,12 +148,12 @@ double jac_sequence(double* a, int mm, int nn, int kk, int itmax, double maxeps)
     return eps;
 }
 
-void print_benchmark(double eps, struct timeval startt, struct timeval endt)
+void print_benchmark(double eps, float second)
 {
     printf(" Jacobi3D Benchmark Completed.\n");
     printf(" Size            = %4d x %4d x %4d\n", L, L, L);
     printf(" Iterations      =       %12d\n", ITMAX);
-    printf(" Time in seconds =       %12.2lf\n", endt.tv_sec - startt.tv_sec + (endt.tv_usec - startt.tv_usec) * 0.000001);
+    printf(" Time in seconds =       %12.2lf\n", second);
     printf(" Operation type  =     floating point\n");
     //printf(" Verification    =       %12s\n", (fabs(eps - 5.058044) < 1e-11 ? "SUCCESSFUL" : "UNSUCCESSFUL"));
     printf(" Verification    =       %12s\n", (eps <= 5.058044  ? "SUCCESSFUL" : "UNSUCCESSFUL"));
@@ -168,13 +171,22 @@ int main(void)
 	cudaMalloc((void**)&a, L * L * L * sizeof(double));
 	initial << <block, thread >> > (L, L, L, a);
 
-    gettimeofday(&startt, NULL);
+    //gettimeofday(&startt, NULL);
+    cudaEvent_t start, stop;
+    cudaEventCreate(&start);
+    cudaEventCreate(&stop);
+    
+    cudaEventRecord(start, 0);
 	eps = jac_parallel(a, L, L, L, ITMAX, MAXEPS);
-    gettimeofday(&endt, NULL);
+    //gettimeofday(&endt, NULL);
+    cudaEventRecord(stop, 0);
+    cudaEventSynchronize(stop);
+    float milliseconds = 0;
+    cudaEventElapsedTime(&milliseconds, start, stop);
 
 	cudaFree(a);
     
-    print_benchmark(eps, startt, endt);
+    print_benchmark(eps, milliseconds * 0.000001);
 
     a = (double*) malloc(L * L * L * sizeof(double));
     initial_seq(L, L, L, a);
@@ -183,7 +195,8 @@ int main(void)
     eps = jac_sequence(a, L, L, L, ITMAX, MAXEPS);
     gettimeofday(&endt, NULL);
 
-    print_benchmark(eps, startt, endt);
+    float seconds = endt.tv_sec - startt.tv_sec + (endt.tv_usec - startt.tv_usec) * 0.000001;
+    print_benchmark(eps, seconds);
 
     free(a);
 	return 0;
