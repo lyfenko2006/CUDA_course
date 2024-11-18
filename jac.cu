@@ -2,6 +2,8 @@
 #include <stdio.h>
 #include <thrust/host_vector.h>
 #include <thrust/device_vector.h>
+#include <time.h>
+#include <sys/time.h>
 
 #define a(i, j, k) a[((i) * nn + (j)) * kk + (k)]
 #define b(i, j, k) b[((i) * nn + (j)) * kk + (k)]
@@ -63,15 +65,17 @@ double jac(double* a, int mm, int nn, int kk, int itmax, double maxeps)
 	for (it = 1; it <= itmax - 1; it++)
 	{
 		function << <block, thread >> > (mm, nn, kk, a, b);	
-	
+	    cudaDeviceSynchronize();
 		eps = 0.;
 
 		thrust::device_vector<double> diff(mm * nn * kk);
 		double* ptrdiff = thrust::raw_pointer_cast(&diff[0]);
 		difference << <block, thread >> > (mm, nn, kk, a, b, ptrdiff);
+        cudaDeviceSynchronize();
 
 		eps = thrust::reduce(diff.begin(), diff.end(), 0.0, thrust::maximum<double>());
 		ab << <block, thread >> > (mm, nn, kk, a, b);
+        cudaDeviceSynchronize();
 
 		//if (TRACE && it % TRACE == 0)
 			printf(" IT = %4i   EPS = %14.7E\n", it, eps);
@@ -102,19 +106,25 @@ __global__ void initial(int mm, int nn, int kk, double* a)
 int main(void)
 {
 	double *a;
+    double eps;
+    struct timeval startt, endt;
 	cudaMalloc((void**)&a, L * L * L * sizeof(double));
 	initial << <block, thread >> > (L, L, L, a);
-	jac(a, L, L, L, ITMAX, MAXEPS);
+	
+    gettimeofday(&startt, NULL);
+    eps = jac(a, L, L, L, ITMAX, MAXEPS);
+    cudaDeviceSynchronize();
+    gettimeofday(&endt, NULL);
+    
 	cudaFree(a);
 
 	printf(" Jacobi3D Benchmark Completed.\n");
-    	printf(" Size            = %4d x %4d x %4d\n", L, L, L);
-    	printf(" Iterations      =       %12d\n", ITMAX);
-    	//TODO
-    	//printf(" Time in seconds =       %12.2lf\n", endt - startt);
-    	printf(" Operation type  =     floating point\n");
-    	//printf(" Verification    =       %12s\n", (fabs(eps - 5.058044) < 1e-11 ? "SUCCESSFUL" : "UNSUCCESSFUL"));
-
-    	printf(" END OF Jacobi3D Benchmark\n");
+    printf(" Size            = %4d x %4d x %4d\n", L, L, L);
+    printf(" Iterations      =       %12d\n", ITMAX);
+    printf(" Time in seconds =       %12.2lf\n", endt.tv_sec - startt.tv_sec + (endt.tv_usec - startt.tv_usec) * 0.000001);
+    printf(" Operation type  =     floating point\n");
+    //printf(" Verification    =       %12s\n", (fabs(eps - 5.058044) < 1e-11 ? "SUCCESSFUL" : "UNSUCCESSFUL"));
+    printf(" Verification    =       %12s\n", (eps <= 5.058044  ? "SUCCESSFUL" : "UNSUCCESSFUL"));
+    printf(" END OF Jacobi3D Benchmark\n");
 	return 0;
 }
