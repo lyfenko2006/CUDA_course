@@ -64,15 +64,17 @@ double jac_parallel(double* a, int mm, int nn, int kk, int itmax, double maxeps)
 	for (it = 1; it <= itmax - 1; it++)
 	{
 		function << <block, thread >> > (mm, nn, kk, a, b);	
-	
+	    cudaDeviceSynchronize();
 		eps = 0.;
 
 		thrust::device_vector<double> diff(mm * nn * kk);
 		double* ptrdiff = thrust::raw_pointer_cast(&diff[0]);
 		difference << <block, thread >> > (mm, nn, kk, a, b, ptrdiff);
+        cudaDeviceSynchronize();
 
 		eps = thrust::reduce(diff.begin(), diff.end(), 0.0, thrust::maximum<double>());
 		ab << <block, thread >> > (mm, nn, kk, a, b);
+        cudaDeviceSynchronize();
 
 		//if (TRACE && it % TRACE == 0)
 			printf(" IT = %4i   EPS = %14.7E\n", it, eps);
@@ -170,6 +172,7 @@ int main(void)
 
     gettimeofday(&startt, NULL);
 	eps = jac_parallel(a, L, L, L, ITMAX, MAXEPS);
+    cudaDeviceSynchronize();
     gettimeofday(&endt, NULL);
 
 	cudaFree(a);
