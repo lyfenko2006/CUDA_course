@@ -37,6 +37,41 @@
 2. Оценить ускорение программы по отношению к последовательной версии.\\
 \newpage
 \section{Описание программы}
+\textbf{При распараллеливании программы было создано 4 ядра:}\\
+\begin{verbatim}
+__global__ void init_parallel(double *a)
+\end{verbatim}
+Параллельно инициализирует массив.\\
+\begin{verbatim}
+__global__ void f1(double *a, int ii)
+\end{verbatim}
+Используется для счета алгоритма.
+\begin{verbatim}
+__global__ void f2(double *a, int jj)
+\end{verbatim}
+Используется для счета алгоритма.
+\begin{verbatim}
+__global__ void f3(double *a, int kk, double *tmp1, double *tmp2)
+\end{verbatim}
+Используется для счета алгоритма.\\
+
+\textbf{Список функций:}\\
+\begin{verbatim}
+double adi_parallel(double* a)
+\end{verbatim}
+Запускает параллельный счет алгоритма. Возвращает полученное eps.
+\begin{verbatim}
+void init_seq(double *a)
+\end{verbatim}
+Последовательно инициализирует массив.
+\begin{verbatim}
+double adi_seq(double* a)
+\end{verbatim}
+Запускает последовательный счет алгоритма. Возвращает полученное eps.
+\begin{verbatim}
+void print_benchmark(struct timeval startt, struct timeval endt)
+\end{verbatim}
+Выводит результат теста.
 \newpage
 \section{Результаты работы программы в зависимости от выбора размера блока нитей}
 \begin{center}
@@ -252,7 +287,7 @@ f3: j = x, k = y, i = z
 \newpage
 \section{Результаты работы программы на различных входных данных}
 \begin{center}
-    dim3 block = dim3(48, 48, 48);\\
+    dim3 block = dim3((nx + 7) / 8, (ny + 7) / 8, (nz + 7) / 8);\\
     dim3 thread = dim3(8, 8, 8);\\
 \end{center}
 \begin{minipage}{.5\textwidth}
@@ -329,7 +364,7 @@ f3: j = x, k = y, i = z
 \end{minipage}
 \newpage
 \begin{center}
-    dim3 block = dim3(12, 48, 192);\\
+    dim3 block = dim3((nx + 31) / 32, (ny + 7) / 8, (nz + 1) / 2);\\
     dim3 thread = dim3(32, 8, 2);\\
 \end{center}
 \begin{minipage}{.5\textwidth}
