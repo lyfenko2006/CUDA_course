@@ -14,18 +14,18 @@
 #define tmp2(i, j, k) tmp2[((i) * ny + (j)) * nz + (k)]
 
 #define Max(a, b) ((a) > (b) ? (a) : (b))
-
-dim3 block = dim3(64, 64, 64);
-dim3 thread = dim3(8, 8, 8);
+int ox = 8, oy = 8, oz = 8;
+dim3 block = dim3((nx + ox - 1) / ox, (ny + oy - 1) / oy, (nz + oz - 1) / oz);
+dim3 thread = dim3(ox, oy, oz);
 
 double maxeps = 0.01, eps;
 int itmax = 100;
 
 __global__ void init_parallel(double *a)
 {
-	int k = blockIdx.x * blockDim.x + threadIdx.x;
+	int i = blockIdx.x * blockDim.x + threadIdx.x;
 	int j = blockIdx.y * blockDim.y + threadIdx.y;
-	int i = blockIdx.z * blockDim.z + threadIdx.z;
+	int k = blockIdx.z * blockDim.z + threadIdx.z;
 	if (i > -1 && i < nx)
 		if (j > -1 && j < ny)
 			if (k > -1 && k < nz)
@@ -38,9 +38,9 @@ __global__ void init_parallel(double *a)
 
 __global__ void f1(double *a, int ii)
 {
-    int k = blockIdx.z * blockDim.z + threadIdx.z;
-    int i = blockIdx.x * blockDim.x + threadIdx.x;
+    int k = blockIdx.x * blockDim.x + threadIdx.x;
 	int j = blockIdx.y * blockDim.y + threadIdx.y;
+    int i = blockIdx.z * blockDim.z + threadIdx.z;
     if (i == ii)        
         if (j > 0 && j < ny - 1)
             if (k > 0 && k < nz - 1)
@@ -49,9 +49,9 @@ __global__ void f1(double *a, int ii)
 
 __global__ void f2(double *a, int jj)
 {
-    int i = blockIdx.x * blockDim.x + threadIdx.x;
-	int j = blockIdx.y * blockDim.y + threadIdx.y;
-    int k = blockIdx.z * blockDim.z + threadIdx.z;
+    int k = blockIdx.x * blockDim.x + threadIdx.x;
+	int i = blockIdx.y * blockDim.y + threadIdx.y;
+    int j = blockIdx.z * blockDim.z + threadIdx.z;
     if (j == jj)
         if (i > 0 && i < nx - 1)
             if (k > 0 && k < nz - 1)
@@ -60,9 +60,9 @@ __global__ void f2(double *a, int jj)
 
 __global__ void f3(double *a, int kk, double *tmp1, double *tmp2)
 {
-    int i = blockIdx.x * blockDim.x + threadIdx.x;
-	int j = blockIdx.y * blockDim.y + threadIdx.y;
-    int k = blockIdx.z * blockDim.z + threadIdx.z;
+    int j = blockIdx.x * blockDim.x + threadIdx.x;
+	int k = blockIdx.y * blockDim.y + threadIdx.y;
+    int i = blockIdx.z * blockDim.z + threadIdx.z;
     if (k == kk)
         if (i > 0 && i < nx - 1)
             if (j > 0 && j < ny - 1) {
@@ -158,7 +158,6 @@ void print_benchmark(struct timeval startt, struct timeval endt)
     printf(" Time in seconds =       %12.2lf\n", endt.tv_sec - startt.tv_sec + (endt.tv_usec - startt.tv_usec) * 0.000001);
     printf(" Operation type  =   double precision\n");
     printf(" Verification    =       %12s\n", (fabs(eps - 0.07249074) < 1e-6 ? "SUCCESSFUL" : "UNSUCCESSFUL"));
-    printf("%lf\n", eps);
     printf(" END OF ADI Benchmark\n");
 }
 
@@ -171,7 +170,6 @@ int main(int argc, char *argv[])
     gettimeofday(&startt, NULL);
     eps = adi_parallel(a);
     gettimeofday(&endt, NULL);
-    printf("%lf\n", eps);
     print_benchmark(startt, endt);
 
     cudaFree(a);
