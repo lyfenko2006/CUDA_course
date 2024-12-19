@@ -11,11 +11,12 @@
 
 #define Max(a, b) ((a) > (b) ? (a) : (b))
 
-#define L 500
-#define ITMAX 200
+#define L 384
+#define ITMAX 100
 
-dim3 block = dim3(64, 64, 64);
-dim3 thread = dim3(8, 8, 8);
+int ox = 8, oy = 8, oz = 8;
+dim3 block = dim3((L + ox - 1) / ox, (L + oy - 1) / oy, (L + oz - 1) / oz);
+dim3 thread = dim3(ox, oy, oz);
 
 int i, j, k, it;
 double eps;
@@ -99,7 +100,7 @@ __global__ void initial(int mm, int nn, int kk, double* a)
 				if (i == 0 || j == 0 || k == 0 || i == mm - 1 || j == nn - 1 || k == kk - 1)
                    	 		a(i, j, k) = 0;
                 		else
-                    			a(i, j, k) = 4 + i + j + k;
+                    		a(i, j, k) = 4 + i + j + k;
 }
 
 void initial_seq(int mm, int nn, int kk, double *a)
@@ -154,8 +155,8 @@ void print_benchmark(double eps, struct timeval startt, struct timeval endt)
     printf(" Iterations      =       %12d\n", ITMAX);
     printf(" Time in seconds =       %12.2lf\n", endt.tv_sec - startt.tv_sec + (endt.tv_usec - startt.tv_usec) * 0.000001);
     printf(" Operation type  =     floating point\n");
-    //printf(" Verification    =       %12s\n", (fabs(eps - 5.058044) < 1e-11 ? "SUCCESSFUL" : "UNSUCCESSFUL"));
-    printf(" Verification    =       %12s\n", (eps <= 5.058044  ? "SUCCESSFUL" : "UNSUCCESSFUL"));
+    printf(" Verification    =       %12s\n", (fabs(eps - 5.058044) < 1e-11 ? "SUCCESSFUL" : "UNSUCCESSFUL"));
+    //printf(" Verification    =       %12s\n", (eps <= 5.058044  ? "SUCCESSFUL" : "UNSUCCESSFUL"));
 
     printf(" END OF Jacobi3D Benchmark\n");
 }

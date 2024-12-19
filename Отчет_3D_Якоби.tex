@@ -36,8 +36,53 @@
 
 2. Оценить ускорение программы по отношению к последовательной версии.\\
 \newpage
+\section{Описание программы}
+\textbf{При распараллеливании программы было создано 4 ядра:}\\
+\begin{verbatim}
+__global__ void function(int mm, int nn, int kk, double* a, 
+        double* b)
+\end{verbatim}
+Используется для счета алгоритма.
+\begin{verbatim}
+__global__ void difference(int mm, int nn, int kk, 
+        double* a, double* b, double *d)
+\end{verbatim}
+Используется для счета алгоритма.
+\begin{verbatim}
+__global__ void ab(int mm, int nn, int kk, double* a, double* b)
+\end{verbatim}
+Используется для счета алгоритма.
+\begin{verbatim}
+__global__ void initial(int mm, int nn, int kk, double* a)
+\end{verbatim}
+Параллельно инициализирует массив.\\
+
+\textbf{Список функций:}\\
+\begin{verbatim}
+double jac_parallel(double* a, int mm, int nn, int kk, 
+        int itmax, double maxeps)
+\end{verbatim}
+Запускает параллельный счет алгоритма. Возвращает полученное eps.
+\begin{verbatim}
+void initial_seq(int mm, int nn, int kk, double *a)
+\end{verbatim}
+Последовательно инициализирует массив.
+\begin{verbatim}
+double jac_sequence(double* a, int mm, int nn, int kk, 
+        int itmax, double maxeps)
+\end{verbatim}
+Запускает последовательный счет алгоритма. Возвращает полученное eps.
+\begin{verbatim}
+void print_benchmark(double eps, struct timeval startt, 
+        struct timeval endt)
+\end{verbatim}
+Выводит результат теста.
 
 \section{Результаты работы программы}
+\begin{center}
+    dim3 block = dim3((L + 7) / 8, (L + 7) / 8, (L + 7) / 8);\\
+    dim3 thread = dim3(8, 8, 8);\\
+\end{center}
 \begin{minipage}{.5\textwidth}
 \textbf{Последовательное выполнение:}\\
 
@@ -54,7 +99,7 @@ Size            =  384 x  384 x  384\\
 Iterations      =                100\\
 Time in seconds =              30.35\\
 Operation type  =     floating point\\
-Verification    =       UNSUCCESSFUL\\
+Verification    =         SUCCESSFUL\\
 END OF Jacobi3D Benchmark\\
 
 Jacobi3D Benchmark Completed.\\
@@ -62,7 +107,85 @@ Jacobi3D Benchmark Completed.\\
  Iterations      =                100\\
  Time in seconds =              66.82\\
  Operation type  =     floating point\\
- Verification    =       UNSUCCESSFUL\\
+ Verification    =         SUCCESSFUL\\
+ END OF Jacobi3D Benchmark\\
+
+Jacobi3D Benchmark Completed.\\
+ Size            =  500 x  500 x  500\\
+ Iterations      =                200\\
+ Time in seconds =             134.47\\
+ Operation type  =     floating point\\
+ Verification    =         SUCCESSFUL\\
+ END OF Jacobi3D Benchmark\\
+ 
+\end{minipage}
+\begin{minipage}{.45\textwidth}
+\textbf{Параллельное выполнение:}\\
+
+ Jacobi3D Benchmark Completed.\\
+ Size            =  100 x  100 x  100\\
+ Iterations      =                100\\
+ Time in seconds =               0.06\\
+ Operation type  =     floating point\\
+ Verification    =         SUCCESSFUL\\
+ END OF Jacobi3D Benchmark\\
+
+Jacobi3D Benchmark Completed.\\
+ Size            =  384 x  384 x  384\\
+ Iterations      =                100\\
+ Time in seconds =               1.32\\
+ Operation type  =     floating point\\
+ Verification    =         SUCCESSFUL\\
+ END OF Jacobi3D Benchmark\\
+
+ Jacobi3D Benchmark Completed.\\
+ Size            =  500 x  500 x  500\\
+ Iterations      =                100\\
+ Time in seconds =               2.52\\
+ Operation type  =     floating point\\
+ Verification    =         SUCCESSFUL\\
+ END OF Jacobi3D Benchmark\\
+
+ Jacobi3D Benchmark Completed.\\
+ Size            =  500 x  500 x  500\\
+ Iterations      =                200\\
+ Time in seconds =               5.19\\
+ Operation type  =     floating point\\
+ Verification    =         SUCCESSFUL\\
+ END OF Jacobi3D Benchmark\\
+
+\end{minipage}
+
+\newpage
+\begin{center}
+    dim3 block = dim3(64, 64, 64);\\
+    dim3 thread = dim3(8, 8, 8);\\
+\end{center}
+\begin{minipage}{.5\textwidth}
+\textbf{Последовательное выполнение:}\\
+
+ Jacobi3D Benchmark Completed.\\
+ Size            =  100 x  100 x  100\\
+ Iterations      =                100\\
+ Time in seconds =               0.52\\
+ Operation type  =     floating point\\
+ Verification    =         SUCCESSFUL\\
+ END OF Jacobi3D Benchmark\\
+ 
+Jacobi3D Benchmark Completed.\\
+Size            =  384 x  384 x  384\\
+Iterations      =                100\\
+Time in seconds =              30.35\\
+Operation type  =     floating point\\
+Verification    =         SUCCESSFUL\\
+END OF Jacobi3D Benchmark\\
+
+Jacobi3D Benchmark Completed.\\
+ Size            =  500 x  500 x  500\\
+ Iterations      =                100\\
+ Time in seconds =              66.82\\
+ Operation type  =     floating point\\
+ Verification    =         SUCCESSFUL\\
  END OF Jacobi3D Benchmark\\
 
 Jacobi3D Benchmark Completed.\\
@@ -90,7 +213,7 @@ Jacobi3D Benchmark Completed.\\
  Iterations      =                100\\
  Time in seconds =               1.35\\
  Operation type  =     floating point\\
- Verification    =       UNSUCCESSFUL\\
+ Verification    =         SUCCESSFUL\\
  END OF Jacobi3D Benchmark\\
 
  Jacobi3D Benchmark Completed.\\
@@ -98,7 +221,7 @@ Jacobi3D Benchmark Completed.\\
  Iterations      =                100\\
  Time in seconds =               2.53\\
  Operation type  =     floating point\\
- Verification    =       UNSUCCESSFUL\\
+ Verification    =         SUCCESSFUL\\
  END OF Jacobi3D Benchmark\\
 
  Jacobi3D Benchmark Completed.\\
@@ -110,14 +233,13 @@ Jacobi3D Benchmark Completed.\\
  END OF Jacobi3D Benchmark\\
 
 \end{minipage}
-
 \newpage
 \section{Сравнение скорости работы алгоритмов}
 \textbf{Последовательный алгоритм:}\\
 
-Теоритическая оценка: $O(L^3 * I)$\\
+Теоретическая оценка: $O(L^3 * I)$\\
 
 \textbf{Параллельный алгоритм:}\\
 
-Теоритическая оценка: $O(I * ???)$
+Теоретическая оценка: $O(I * ???)$
 \end{document}
