@@ -14,15 +14,15 @@
 #define tmp2(i, j, k) tmp2[((i) * ny + (j)) * nz + (k)]
 
 #define Max(a, b) ((a) > (b) ? (a) : (b))
-int ox1 = 2, oy1 = 512;
+int ox1 = 32, oy1 = 16;
 dim3 block1 = dim3((nx + ox1 - 1) / ox1, (ny + oy1 - 1) / oy1);
 dim3 thread1 = dim3(ox1, oy1);
 
-int ox2 = 512, oy2 = 2;
+int ox2 = 32, oy2 = 16;
 dim3 block2 = dim3((nx + ox2 - 1) / ox2, (ny + oy2 - 1) / oy2);
 dim3 thread2 = dim3(ox2, oy2);
 
-int ox3 = 2, oy3 = 512;
+int ox3 = 32, oy3 = 16;
 dim3 block3 = dim3((nx + ox3 - 1) / ox3, (ny + oy3 - 1) / oy3);
 dim3 thread3 = dim3(ox3, oy3);
 
@@ -35,9 +35,9 @@ int itmax = 100;
 
 __global__ void init_parallel(double *a)
 {
-	int i = blockIdx.x * blockDim.x + threadIdx.x;
+	int k = blockIdx.x * blockDim.x + threadIdx.x;
 	int j = blockIdx.y * blockDim.y + threadIdx.y;
-	int k = blockIdx.z * blockDim.z + threadIdx.z;
+	int i = blockIdx.z * blockDim.z + threadIdx.z;
 	if (i > -1 && i < nx)
 		if (j > -1 && j < ny)
 			if (k > -1 && k < nz)
@@ -50,8 +50,8 @@ __global__ void init_parallel(double *a)
 
 __global__ void f1(double *a, int ii)
 {
-    int j = blockIdx.x * blockDim.x + threadIdx.x;
-	int k = blockIdx.y * blockDim.y + threadIdx.y;   
+    int k = blockIdx.x * blockDim.x + threadIdx.x;
+	int j = blockIdx.y * blockDim.y + threadIdx.y;   
     if (j > 0 && j < ny - 1)
         if (k > 0 && k < nz - 1)
             a(ii, j, k) = (a(ii - 1, j, k) + a(ii + 1, j, k)) / 2;
@@ -68,8 +68,8 @@ __global__ void f2(double *a, int jj)
 
 __global__ void f3(double *a, int kk)
 {
-    int i = blockIdx.x * blockDim.x + threadIdx.x;
-	int j = blockIdx.y * blockDim.y + threadIdx.y;
+    int j = blockIdx.x * blockDim.x + threadIdx.x;
+	int i = blockIdx.y * blockDim.y + threadIdx.y;
     if (i > 0 && i < nx - 1)
         if (j > 0 && j < ny - 1) {
             a(i, j, kk) = (a(i, j, kk - 1) + a(i, j, kk + 1)) / 2;
@@ -78,9 +78,9 @@ __global__ void f3(double *a, int kk)
 
 __global__ void f_cp(double *a, double *tmp1)
 {
-    int i = blockIdx.x * blockDim.x + threadIdx.x;
+    int k = blockIdx.x * blockDim.x + threadIdx.x;
     int j = blockIdx.y * blockDim.y + threadIdx.y;
-    int k = blockIdx.z * blockDim.z + threadIdx.z;
+    int i = blockIdx.z * blockDim.z + threadIdx.z;
     
     if (i > 0 && i < nx - 1)
         if (j > 0 && j < ny - 1)
@@ -91,9 +91,9 @@ __global__ void f_cp(double *a, double *tmp1)
 
 __global__ void f4(double *a, double *tmp1, double *tmp2)
 {
-    int i = blockIdx.x * blockDim.x + threadIdx.x;
+    int k = blockIdx.x * blockDim.x + threadIdx.x;
     int j = blockIdx.y * blockDim.y + threadIdx.y;
-    int k = blockIdx.z * blockDim.z + threadIdx.z;
+    int i = blockIdx.z * blockDim.z + threadIdx.z;
 
     if (i > 0 && i < nx - 1)
         if (j > 0 && j < ny - 1)
