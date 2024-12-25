@@ -165,7 +165,7 @@ int main(int argc, char *argv[])
     double *a;
     struct timeval startt, endt;
     cudaMalloc((void**)&a, nx * ny * nz * sizeof(double));
-    init << <block, thread >> > (a);
+    init_parallel << <block_init, thread_init >> > (a);
     gettimeofday(&startt, NULL);
     adi_parallel(a);
     gettimeofday(&endt, NULL);
