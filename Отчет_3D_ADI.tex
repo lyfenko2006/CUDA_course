@@ -37,7 +37,7 @@
 2. Оценить ускорение программы по отношению к последовательной версии.\\
 \newpage
 \section{Описание программы}
-\textbf{При распараллеливании программы было создано 4 ядра:}\\
+\textbf{При распараллеливании программы было создано 6 ядер:}\\
 \begin{verbatim}
 __global__ void init_parallel(double *a)
 \end{verbatim}
@@ -51,9 +51,17 @@ __global__ void f2(double *a, int jj)
 \end{verbatim}
 Используется для счета алгоритма.
 \begin{verbatim}
-__global__ void f3(double *a, int kk, double *tmp1, double *tmp2)
+__global__ void f3(double *a, int kk)
 \end{verbatim}
 Используется для счета алгоритма.\\
+\begin{verbatim}
+__global__ void f_cp(double *a, double *tmp1)
+\end{verbatim}
+Копирование массива.\\
+\begin{verbatim}
+__global__ void f4(double *a, double *tmp1, double *tmp2)
+\end{verbatim}
+Для нахождения eps.\\
 
 \textbf{Список функций:}\\
 \begin{verbatim}
@@ -73,223 +81,7 @@ void print_benchmark(struct timeval startt, struct timeval endt)
 \end{verbatim}
 Выводит результат теста.
 \newpage
-\section{Результаты работы программы в зависимости от выбора размера блока нитей}
-\begin{center}
-    Size            =  384 x  384 x  384\\
-    Iterations      =                100\\
-    Operation type  =   double precision\\
-    Параллельное выполнение, симметричный блок:\\
-\end{center}
-\begin{minipage}{.5\textwidth}
-    dim3 block = dim3(1, 1, 1);\\
-    dim3 thread = dim3(384, 384, 384);\\
-    SEGFAULT\\
-    
-    dim3 block = dim3(2, 2, 2);\\
-    dim3 thread = dim3(192, 192, 192);\\
-    SEGFAULT\\
-    
-    dim3 block = dim3(4, 4, 4);\\
-    dim3 thread = dim3(96, 96, 96);\\
-    SEGFAULT\\
-    
-    dim3 block = dim3(8, 8, 8);\\
-    dim3 thread = dim3(48, 48, 48);\\
-    SEGFAULT\\
-    
-    dim3 block = dim3(16, 16, 16);\\
-    dim3 thread = dim3(24, 24, 24);\\
-    SEGFAULT\\
-    
-    dim3 block = dim3(32, 32, 32);\\
-    dim3 thread = dim3(12, 12, 12);\\
-    SEGFAULT\\
-    
-    dim3 block = dim3(39, 39, 39);\\
-    dim3 thread = dim3(10, 10, 10);\\
-    ADI Benchmark Completed.\\
-    Time in seconds =             36.63\\
-    Verification    =         SUCCESSFUL\\
-    
-    dim3 block = dim3(40, 40, 40);\\
-    dim3 thread = dim3(10, 10, 10);\\
-    ADI Benchmark Completed.\\
-    Time in seconds =             39.18\\
-    Verification    =         SUCCESSFUL\\
-\end{minipage}
-\begin{minipage}{.45\textwidth}
-    dim3 block = dim3(43, 43, 43);\\
-    dim3 thread = dim3(9, 9, 9);\\
-    ADI Benchmark Completed.\\
-    Time in seconds =             35.20\\
-    Verification    =         SUCCESSFUL\\
-    
-    dim3 block = dim3(48, 48, 48);\\
-    dim3 thread = dim3(8, 8, 8);\\
-    ADI Benchmark Completed.\\
-    Time in seconds =             30.45\\
-    Verification    =         SUCCESSFUL\\
-    
-    dim3 block = dim3(55, 55, 55);\\
-    dim3 thread = dim3(8, 8, 8);\\
-    ADI Benchmark Completed.\\
-    Time in seconds =             44.39\\
-    Verification    =         SUCCESSFUL\\
-    
-    dim3 block = dim3(55, 55, 55);\\
-    dim3 thread = dim3(7, 7, 7);\\
-    ADI Benchmark Completed.\\
-    Time in seconds =             30.69\\
-    Verification    =         SUCCESSFUL\\
-    
-    dim3 block = dim3(64, 64, 64);\\
-    dim3 thread = dim3(6, 6, 6);\\
-    ADI Benchmark Completed.\\
-    Time in seconds =              46.37\\
-    Verification    =         SUCCESSFUL\\
-    
-    dim3 block = dim3(128, 128, 128);\\
-    dim3 thread = dim3(3, 3, 3);\\
-    ADI Benchmark Completed.\\
-    Time in seconds =             359.92\\
-    Verification    =         SUCCESSFUL\\
-\end{minipage}
-
-\noindent \textbf{Вывод:} Для заданных начальных условий оптимальный выбор:\\
-dim3 block = dim3(48, 48, 48);\\
-dim3 thread = dim3(8, 8, 8);
-\newpage
-
-\begin{center}
-    Size            =  384 x  384 x  384\\
-    Iterations      =                100\\
-    Operation type  =   double precision\\
-    Параллельное выполнение, асимметричный блок:\\
-\end{center}
-\begin{minipage}{.5\textwidth}
-    dim3 block = dim3(24, 96, 192);\\
-    dim3 thread = dim3(16, 4, 2);\\
-    ADI Benchmark Completed.\\
-    Time in seconds =             77.36\\
-    Verification    =         SUCCESSFUL\\
-
-    dim3 block = dim3(12, 96, 384);\\
-    dim3 thread = dim3(32, 4, 1);\\
-    ADI Benchmark Completed.\\
-    Time in seconds =             77.27\\
-    Verification    =         SUCCESSFUL\\
-
-    dim3 block = dim3(24, 48, 96);\\
-    dim3 thread = dim3(16, 8, 4);\\
-    ADI Benchmark Completed.\\
-    Time in seconds =             29.90\\
-    Verification    =         SUCCESSFUL\\
-
-    dim3 block = dim3(12, 48, 192);\\
-    dim3 thread = dim3(32, 8, 2);\\
-    ADI Benchmark Completed.\\
-    Time in seconds =             29.83\\
-    Verification    =         SUCCESSFUL\\
-\end{minipage}
-\begin{minipage}{.45\textwidth}
-    dim3 block = dim3(6, 48, 192);\\
-    dim3 thread = dim3(64, 8, 2);\\
-    ADI Benchmark Completed.\\
-    Time in seconds =             33.56\\
-    Verification    =         SUCCESSFUL\\
-    
-    dim3 block = dim3(12, 24, 192);\\
-    dim3 thread = dim3(32, 16, 2);\\
-    ADI Benchmark Completed.\\
-    Time in seconds =             34.03\\
-    Verification    =         SUCCESSFUL\\
-    
-    dim3 block = dim3(12, 48, 96);\\
-    dim3 thread = dim3(32, 8, 4);\\
-    ADI Benchmark Completed.\\
-    Time in seconds =             33.70\\
-    Verification    =         SUCCESSFUL\\
-    
-    dim3 block = dim3(3, 48, 192);\\
-    dim3 thread = dim3(128, 8, 2);\\
-    SEGFAULT\\
-\end{minipage}
-
-\noindent \textbf{Вывод:} Для заданных начальных условий оптимальный выбор:\\
-dim3 block = dim3(12, 48, 192);\\
-dim3 thread = dim3(32, 8, 2);
-\newpage
-\section{Результаты работы программы в зависимости от выбора индексов i, j, k.}
-\begin{center}
-    Size            =  384 x  384 x  384\\
-    Iterations      =                100\\
-    Operation type  =   double precision\\
-    dim3 block = dim3(48, 48, 48);\\
-    dim3 thread = dim3(8, 8, 8);\\
-    Параллельное выполнение:\\
-
-    Для всех функций:\\
-    int i = blockIdx.x * blockDim.x + threadIdx.x;\\
-    int j = blockIdx.y * blockDim.y + threadIdx.y;\\
-    int k = blockIdx.z * blockDim.z + threadIdx.z;\\
-\end{center}
-\begin{minipage}{.45\textwidth}
-    Функция f1, время выполнения функции adi\_parallel:\\
-
-    i = x, k = y, j = z\\
-    Time in seconds =             39.34\\
-    j = x, i = y, k = z\\
-    Time in seconds =             39.40\\
-    k = x, i = y, j = z\\
-    Time in seconds =             39.29\\
-    j = x, k = y, i = z\\
-    Time in seconds =             39.23\\
-    k = x, j = y, i = z\\
-    Time in seconds =             39.21\\
-\end{minipage}
-\hspace{1cm}
-\begin{minipage}{.45\textwidth}
-    Функция f2, время выполнения функции adi\_parallel:\\
-
-    i = x, k = y, j = z\\
-    Time in seconds =             39.24\\
-    j = x, i = y, k = z\\
-    Time in seconds =             39.34\\
-    k = x, i = y, j = z\\
-    Time in seconds =             39.18\\
-    j = x, k = y, i = z\\
-    Time in seconds =             39.35\\
-    k = x, j = y, i = z\\
-    Time in seconds =             39.31\\
-\end{minipage}
-
-\vspace{0.5cm}
-\noindent
-\begin{minipage}{.5\textwidth}
-    Функция f3, время выполнения функции adi\_parallel:\\
-
-    i = x, k = y, j = z\\
-    Time in seconds =             30.54\\
-    j = x, i = y, k = z\\
-    Time in seconds =             39.36\\
-    k = x, i = y, j = z\\
-    Time in seconds =             30.46\\
-    j = x, k = y, i = z\\
-    Time in seconds =             30.42\\
-    k = x, j = y, i = z\\
-    Time in seconds =             30.44\\
-\end{minipage}
-
-\noindent \textbf{Вывод:} Для заданных начальных условий оптимальный выбор:\\
-f1: k = x, j = y, i = z\\
-f2: k = x, i = y, j = z\\
-f3: j = x, k = y, i = z
-\newpage
 \section{Результаты работы программы на различных входных данных}
-\begin{center}
-    dim3 block = dim3((nx + 7) / 8, (ny + 7) / 8, (nz + 7) / 8);\\
-    dim3 thread = dim3(8, 8, 8);\\
-\end{center}
 \begin{minipage}{.5\textwidth}
 \textbf{Последовательное выполнение:}\\
 
@@ -332,7 +124,7 @@ f3: j = x, k = y, i = z
  ADI Benchmark Completed.\\
  Size            =  100 x  100 x  100\\
  Iterations      =                100\\
- Time in seconds =               0.52\\
+ Time in seconds =               0.37\\
  Operation type  =   double precision\\
  Verification    =         SUCCESSFUL\\
  END OF ADI Benchmark\\
@@ -340,7 +132,7 @@ f3: j = x, k = y, i = z
  ADI Benchmark Completed.\\
  Size            =  384 x  384 x  384\\
  Iterations      =                100\\
- Time in seconds =              30.14\\
+ Time in seconds =               6.53\\
  Operation type  =   double precision\\
  Verification    =         SUCCESSFUL\\
  END OF ADI Benchmark\\
@@ -348,48 +140,7 @@ f3: j = x, k = y, i = z
  ADI Benchmark Completed.\\
  Size            =  500 x  500 x  500\\
  Iterations      =                100\\
- Time in seconds =              86.13\\
- Operation type  =   double precision\\
- Verification    =         SUCCESSFUL\\
- END OF ADI Benchmark\\
-
- ADI Benchmark Completed.\\
- Size            =  500 x  500 x  500\\
- Iterations      =                200\\
- Time in seconds =             171.96\\
- Operation type  =   double precision\\
- Verification    =         SUCCESSFUL\\
- END OF ADI Benchmark\\
-
-\end{minipage}
-\newpage
-\begin{center}
-    dim3 block = dim3((nx + 31) / 32, (ny + 7) / 8, (nz + 1) / 2);\\
-    dim3 thread = dim3(32, 8, 2);\\
-\end{center}
-\begin{minipage}{.5\textwidth}
-\textbf{Последовательное выполнение:}\\
-
- ADI Benchmark Completed.\\
- Size            =  100 x  100 x  100\\
- Iterations      =                100\\
- Time in seconds =               0.93\\
- Operation type  =   double precision\\
- Verification    =         SUCCESSFUL\\
- END OF ADI Benchmark\\
- 
- ADI Benchmark Completed.\\
- Size            =  384 x  384 x  384\\
- Iterations      =                100\\
- Time in seconds =              58.20\\
- Operation type  =   double precision\\
- Verification    =         SUCCESSFUL\\
- END OF ADI Benchmark\\
-
- ADI Benchmark Completed.\\
- Size            =  500 x  500 x  500\\
- Iterations      =                100\\
- Time in seconds =             127.45\\
+ Time in seconds =              17.78\\
  Operation type  =   double precision\\
  Verification    =         SUCCESSFUL\\
  END OF ADI Benchmark\\
@@ -397,43 +148,7 @@ f3: j = x, k = y, i = z
  ADI Benchmark Completed.\\
  Size            =  500 x  500 x  500\\
  Iterations      =                200\\
- Time in seconds =             256.08\\
- Operation type  =   double precision\\
- Verification    =         SUCCESSFUL\\
- END OF ADI Benchmark\\
- 
-\end{minipage}
-\begin{minipage}{.45\textwidth}
-\textbf{Параллельное выполнение:}\\
-
- ADI Benchmark Completed.\\
- Size            =  100 x  100 x  100\\
- Iterations      =                100\\
- Time in seconds =               0.55\\
- Operation type  =   double precision\\
- Verification    =         SUCCESSFUL\\
- END OF ADI Benchmark\\
-
- ADI Benchmark Completed.\\
- Size            =  384 x  384 x  384\\
- Iterations      =                100\\
- Time in seconds =              29.82\\
- Operation type  =   double precision\\
- Verification    =         SUCCESSFUL\\
- END OF ADI Benchmark\\
-
- ADI Benchmark Completed.\\
- Size            =  500 x  500 x  500\\
- Iterations      =                100\\
- Time in seconds =              86.21\\
- Operation type  =   double precision\\
- Verification    =         SUCCESSFUL\\
- END OF ADI Benchmark\\
-
- ADI Benchmark Completed.\\
- Size            =  500 x  500 x  500\\
- Iterations      =                200\\
- Time in seconds =             172.34\\
+ Time in seconds =             27.55\\
  Operation type  =   double precision\\
  Verification    =         SUCCESSFUL\\
  END OF ADI Benchmark\\
