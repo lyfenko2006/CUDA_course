@@ -62,6 +62,14 @@ __global__ void f_cp(double *a, double *tmp1)
 __global__ void f4(double *a, double *tmp1, double *tmp2)
 \end{verbatim}
 Для нахождения eps.\\
+\begin{verbatim}
+__global__ void f_cp_k_i_j(double *a, double *tmp3)
+\end{verbatim}
+Переупорядочивает данные в массиве на k, i, j.\\
+\begin{verbatim}
+__global__ void f_cp_j_k_i(double *a, double *tmp3)
+\end{verbatim}
+Переупорядочивает данные в массиве на j, k, i.\\
 
 \textbf{Список функций:}\\
 \begin{verbatim}
@@ -88,7 +96,7 @@ void print_benchmark(struct timeval startt, struct timeval endt)
  ADI Benchmark Completed.\\
  Size            =  100 x  100 x  100\\
  Iterations      =                100\\
- Time in seconds =               0.93\\
+ Time in seconds =               0.38\\
  Operation type  =   double precision\\
  Verification    =         SUCCESSFUL\\
  END OF ADI Benchmark\\
@@ -96,7 +104,7 @@ void print_benchmark(struct timeval startt, struct timeval endt)
  ADI Benchmark Completed.\\
  Size            =  384 x  384 x  384\\
  Iterations      =                100\\
- Time in seconds =              57.97\\
+ Time in seconds =              29.74\\
  Operation type  =   double precision\\
  Verification    =         SUCCESSFUL\\
  END OF ADI Benchmark\\
@@ -104,7 +112,7 @@ void print_benchmark(struct timeval startt, struct timeval endt)
  ADI Benchmark Completed.\\
  Size            =  500 x  500 x  500\\
  Iterations      =                100\\
- Time in seconds =             127.33\\
+ Time in seconds =              66.37\\
  Operation type  =   double precision\\
  Verification    =         SUCCESSFUL\\
  END OF ADI Benchmark\\
@@ -112,11 +120,18 @@ void print_benchmark(struct timeval startt, struct timeval endt)
  ADI Benchmark Completed.\\
  Size            =  500 x  500 x  500\\
  Iterations      =                200\\
- Time in seconds =             256.04\\
+ Time in seconds =             132.80\\
  Operation type  =   double precision\\
  Verification    =         SUCCESSFUL\\
  END OF ADI Benchmark\\
- 
+
+ ADI Benchmark Completed.\\
+ Size            =  100 x  200 x  300\\
+ Iterations      =                100\\
+ Time in seconds =               3.04\\
+ Operation type  =   double precision\\
+ Verification    =         SUCCESSFUL\\
+ END OF ADI Benchmark
 \end{minipage}
 \begin{minipage}{.45\textwidth}
 \textbf{Параллельное выполнение:}\\
@@ -124,7 +139,7 @@ void print_benchmark(struct timeval startt, struct timeval endt)
  ADI Benchmark Completed.\\
  Size            =  100 x  100 x  100\\
  Iterations      =                100\\
- Time in seconds =               0.37\\
+ Time in seconds =               0.32\\
  Operation type  =   double precision\\
  Verification    =         SUCCESSFUL\\
  END OF ADI Benchmark\\
@@ -132,7 +147,7 @@ void print_benchmark(struct timeval startt, struct timeval endt)
  ADI Benchmark Completed.\\
  Size            =  384 x  384 x  384\\
  Iterations      =                100\\
- Time in seconds =               6.53\\
+ Time in seconds =               3.73\\
  Operation type  =   double precision\\
  Verification    =         SUCCESSFUL\\
  END OF ADI Benchmark\\
@@ -140,7 +155,7 @@ void print_benchmark(struct timeval startt, struct timeval endt)
  ADI Benchmark Completed.\\
  Size            =  500 x  500 x  500\\
  Iterations      =                100\\
- Time in seconds =              17.78\\
+ Time in seconds =               8.40\\
  Operation type  =   double precision\\
  Verification    =         SUCCESSFUL\\
  END OF ADI Benchmark\\
@@ -148,11 +163,18 @@ void print_benchmark(struct timeval startt, struct timeval endt)
  ADI Benchmark Completed.\\
  Size            =  500 x  500 x  500\\
  Iterations      =                200\\
- Time in seconds =             27.55\\
+ Time in seconds =             16.98\\
  Operation type  =   double precision\\
  Verification    =         SUCCESSFUL\\
  END OF ADI Benchmark\\
 
+ ADI Benchmark Completed.\\
+ Size            =  100 x  200 x  300\\
+ Iterations      =                100\\
+ Time in seconds =               0.83\\
+ Operation type  =   double precision\\
+ Verification    =         SUCCESSFUL\\
+ END OF ADI Benchmark
 \end{minipage}
 \newpage
 \section{Сравнение скорости работы алгоритмов}
