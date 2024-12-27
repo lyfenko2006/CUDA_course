@@ -35,12 +35,12 @@ int itmax = 100;
 
 __global__ void init_parallel(double *a)
 {
-	int k = blockIdx.x * blockDim.x + threadIdx.x;
-	int j = blockIdx.y * blockDim.y + threadIdx.y;
-	int i = blockIdx.z * blockDim.z + threadIdx.z;
-	if (i > -1 && i < nx)
-		if (j > -1 && j < ny)
-			if (k > -1 && k < nz)
+        int k = blockIdx.x * blockDim.x + threadIdx.x;
+        int j = blockIdx.y * blockDim.y + threadIdx.y;
+        int i = blockIdx.z * blockDim.z + threadIdx.z;
+        if (i > -1 && i < nx)
+                if (j > -1 && j < ny)
+                        if (k > -1 && k < nz)
                 if (k == 0 || k == nz - 1 || j == 0 || j == ny - 1 || i == 0 || i == nx - 1) {
                     a(i, j, k) = 10.0 * i / (nx - 1) + 10.0 * j / (ny - 1) + 10.0 * k / (nz - 1);
                 } else {
@@ -51,7 +51,7 @@ __global__ void init_parallel(double *a)
 __global__ void f1(double *a, int ii)
 {
     int k = blockIdx.x * blockDim.x + threadIdx.x;
-	int j = blockIdx.y * blockDim.y + threadIdx.y;   
+        int j = blockIdx.y * blockDim.y + threadIdx.y;
     if (j > 0 && j < ny - 1)
         if (k > 0 && k < nz - 1)
             a(ii, j, k) = (a(ii - 1, j, k) + a(ii + 1, j, k)) / 2;
@@ -60,7 +60,7 @@ __global__ void f1(double *a, int ii)
 __global__ void f2(double *a, int jj)
 {
     int k = blockIdx.x * blockDim.x + threadIdx.x;
-	int i = blockIdx.y * blockDim.y + threadIdx.y;
+        int i = blockIdx.y * blockDim.y + threadIdx.y;
     if (i > 0 && i < nx - 1)
         if (k > 0 && k < nz - 1)
             a(i, jj, k) = (a(i, jj - 1, k) + a(i, jj + 1, k)) / 2;
@@ -69,10 +69,10 @@ __global__ void f2(double *a, int jj)
 __global__ void f3(double *a, int kk)
 {
     int j = blockIdx.x * blockDim.x + threadIdx.x;
-	int i = blockIdx.y * blockDim.y + threadIdx.y;
+        int i = blockIdx.y * blockDim.y + threadIdx.y;
     if (i > 0 && i < nx - 1)
         if (j > 0 && j < ny - 1) {
-            a(i, j, kk) = (a(i, j, kk - 1) + a(i, j, kk + 1)) / 2;
+            a(kk, i, j) = (a(kk - 1, i, j) + a(kk + 1, i, j)) / 2;
         }
 }
 
@@ -81,11 +81,37 @@ __global__ void f_cp(double *a, double *tmp1)
     int k = blockIdx.x * blockDim.x + threadIdx.x;
     int j = blockIdx.y * blockDim.y + threadIdx.y;
     int i = blockIdx.z * blockDim.z + threadIdx.z;
-    
-    if (i > 0 && i < nx - 1)
-        if (j > 0 && j < ny - 1)
-            if (k > 0 && k < nz - 1) {
+
+    if (i > -1 && i < nx)
+        if (j > -1 && j < ny)
+            if (k > -1 && k < nz) {
                 tmp1(i, j, k) = a(i, j, k);
+            }
+}
+
+__global__ void f_cp_k_i_j(double *a, double *tmp1)
+{
+    int k = blockIdx.x * blockDim.x + threadIdx.x;
+    int j = blockIdx.y * blockDim.y + threadIdx.y;
+    int i = blockIdx.z * blockDim.z + threadIdx.z;
+
+    if (i > -1 && i < nx)
+        if (j > -1 && j < ny)
+            if (k > -1 && k < nz) {
+                tmp1(k, i, j) = a(i, j, k);
+            }
+}
+
+__global__ void f_cp_j_k_i(double *a, double *tmp1)
+{
+    int k = blockIdx.x * blockDim.x + threadIdx.x;
+    int j = blockIdx.y * blockDim.y + threadIdx.y;
+    int i = blockIdx.z * blockDim.z + threadIdx.z;
+
+    if (i > -1 && i < nx)
+        if (j > -1 && j < ny)
+            if (k > -1 && k < nz) {
+                tmp1(j, k, i) = a(i, j, k);
             }
 }
 
@@ -104,8 +130,8 @@ __global__ void f4(double *a, double *tmp1, double *tmp2)
 
 double adi_parallel(double* a)
 {
-	for (int it = 1; it <= itmax; it++)
-    {      
+        for (int it = 1; it <= itmax; it++)
+    {
         eps = 0;
         for (int ii = 1; ii < nx - 1; ii++) {
 
@@ -120,22 +146,32 @@ double adi_parallel(double* a)
 
         }
         thrust::device_vector<double> diff1(nx * ny * nz);
-		double* tmp1 = thrust::raw_pointer_cast(&diff1[0]);
+                double* tmp1 = thrust::raw_pointer_cast(&diff1[0]);
         thrust::device_vector<double> diff2(nx * ny * nz);
         double* tmp2 = thrust::raw_pointer_cast(&diff2[0]);
 
         f_cp << <block_init, thread_init >> > (a, tmp1);
         cudaDeviceSynchronize();
 
+        thrust::device_vector<double> diff3(nx * ny * nz);
+        double* tmp3 = thrust::raw_pointer_cast(&diff3[0]);
+
+        f_cp_k_i_j << <block_init, thread_init >> > (a, tmp3);
+        cudaDeviceSynchronize();
+
         for (int kk = 1; kk < nz - 1; kk++) {
 
-		    f3 << <block3, thread3 >> > (a, kk);
+                    f3 << <block3, thread3 >> > (tmp3, kk);
             cudaDeviceSynchronize();
 
         }
+
+        f_cp_j_k_i << <block_init, thread_init >> > (tmp3, a);
+        cudaDeviceSynchronize();
+
         f4 << <block_init, thread_init >> > (a, tmp1, tmp2);
         cudaDeviceSynchronize();
-        
+
         eps = thrust::reduce(diff2.begin(), diff2.end(), 0.0, thrust::maximum<double>());
         cudaDeviceSynchronize();
 
@@ -164,7 +200,7 @@ double adi_seq(double* a)
     int i, j, k;
     for (int it = 1; it <= itmax; it++)
     {
-        eps = 0;        
+        eps = 0;
         for (i = 1; i < nx - 1; i++)
             for (j = 1; j < ny - 1; j++)
                 for (k = 1; k < nz - 1; k++)
@@ -184,7 +220,6 @@ double adi_seq(double* a)
                     eps = Max(eps, tmp2);
                     a(i, j, k) = tmp1;
                 }
-
         printf(" IT = %4i   EPS = %14.7E\n", it, eps);
         if (eps < maxeps)
             break;
